@@ -35,7 +35,7 @@ for(i=#drives;1;-1){
  	mainForm.edit.text=drives[i]+"\snap"
  	break
 ```
-### 3.动态指定，改变拼接方式，更方便
+### 3.动态指定，改变拼接方式，更方便更巧妙
 ```aardio
 var drives = sys.volume.getLogicalDrives();
 for(i=#drives;1;-1){
