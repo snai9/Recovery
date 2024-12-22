@@ -15,3 +15,32 @@ else {
 	mainForm.edit3.text="winload.exe"
 }
 ```
+## 从后往前判断盘符的进阶
+### 1.静态指定，适用盘符较少时
+```aardio
+if(io.exist("G:\snap")){
+		mainForm.edit.text="G:\snap"};
+	elseif(io.exist("F:\snap")){
+		mainForm.edit.text="F:\snap"};
+	elseif(io.exist("E:\snap")){
+		mainForm.edit.text="E:\snap"};
+	elseif(io.exist("D:\snap")){
+		mainForm.edit.text="D:\snap"};
+```
+### 2.动态指定，拼接方式直观
+```aardio
+var drives = sys.volume.getLogicalDrives();
+for(i=#drives;1;-1){
+ 	if(io.exist(drives[i]+"\snap")){
+ 	mainForm.edit.text=drives[i]+"\snap"
+ 	break
+```
+### 3.动态指定，改变拼接方式，更方便
+```aardio
+var drives = sys.volume.getLogicalDrives();
+for(i=#drives;1;-1){
+    	var path = string.format("%s\snap", drives[i]); // 使用 string.format 拼接路径
+    	if(io.exist(path)){
+        	mainForm.edit.text = path;
+        	break;
+```
