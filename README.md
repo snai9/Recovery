@@ -63,7 +63,9 @@ echo 第二个参数是: %2
 ```
 
 ### 命名参数
-- 传递方式：命名参数是通过表对象的键值对传递的。例如： aardio var prcs = process.batch.wow64(battext, {par = io.splitpath(mainForm.edit.text).drive; // 命名参数 name = mainForm.edit2.text; // 命名参数 }) 
+- 传递方式：命名参数是通过表对象的键值对传递的。例如： 
+
+  aardio var prcs = process.batch.wow64(battext, {par = io.splitpath(mainForm.edit.text).drive; // 命名参数 name = mainForm.edit2.text; // 命名参数 }) 
 - 接收方式：在批处理中，命名参数通过 %owner.参数名% 接收。例如： batch echo 驱动器是: %owner.par% echo 名称是: %owner.name% 
 
 ### 位置参数
