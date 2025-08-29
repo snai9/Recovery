@@ -5,14 +5,17 @@ mainForm.text=mainForm.text+" V"+tostring(fsys.version.getInfo(io._exepath).prod
 ```
 ## 判断当前系统是工作在UEFI还是BIOS模式
 ```aardio
-//故意给出一个错误GUID值，OUT=0且ERR=998为UEFI，OUT=0且ERR=1，或者OUT=1时为BIOS
+//OUT==0且ERR==ERROR_INVALID_FUNCTION(值为1）为BIOS，OUT==0但ERR!=1，或者OUT==1时为UEFI
 var out = ::Kernel32.GetFirmwareEnvironmentVariableW("","{00000000-0000-0000-0000-000000000000}",null,0);
 var err = ::Kernel32.GetLastError()
-if(0==out && 998==err ){
-	mainForm.edit3.text="winload.efi"
+//mainForm.msgbox("OUT和ERR的值为:  " ++ out ++ " 和 " ++ err)
+//mainForm.msgbox("只有 0和1 才能判断为winload.exe")
+//由于out==1时表示返回成功，是没有错误码的，所以其实直接判断错误码就可以了
+if(1==err ){
+	mainForm.edit3.text="winload.exe"
 } 
 else {
-	mainForm.edit3.text="winload.exe"
+	mainForm.edit3.text="winload.efi"
 }
 ```
 ## 从后往前判断盘符的进阶
