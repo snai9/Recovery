@@ -1,0 +1,17 @@
+import console; 
+var out = ::Kernel32.GetFirmwareEnvironmentVariableW("","{00000000-0000-0000-0000-000000000000}",null,0);
+var err = ::Kernel32.GetLastError("") 
+console.log(out,err)	
+/*
+var out = 0; 
+var err = 1;
+*/
+if((2==out) || (0==out && 998==err) ){
+	console.log("UEFI")
+} 
+
+else {
+	console.log("BIOS")
+}
+
+console.pause(true);

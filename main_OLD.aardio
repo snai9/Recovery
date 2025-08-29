@@ -1,0 +1,205 @@
+//RUNAS//安装PE版一键恢复
+import win.ui;
+/*DSG{{*/
+mainForm = win.form(text="杨东_一键恢复";right=221;bottom=264;acceptfiles=1;border="dialog frame";max=false;min=false;topmost=1)
+mainForm.add(
+button={cls="button";text="安装";left=57;top=216;right=159;bottom=242;z=1};
+edit={cls="edit";left=94;top=117;right=193;bottom=143;edge=1;z=3};
+edit2={cls="edit";text="杨东一键恢复";left=94;top=168;right=193;bottom=194;edge=1;z=5};
+edit3={cls="edit";left=94;top=16;right=193;bottom=42;edge=1;readonly=1;z=7};
+edit4={cls="edit";left=94;top=67;right=193;bottom=93;edge=1;readonly=1;z=9};
+static={cls="static";text="安装目录";left=20;top=123;right=72;bottom=141;transparent=1;z=2};
+static2={cls="static";text="菜单名称";left=20;top=173;right=72;bottom=191;notify=1;transparent=1;z=4};
+static3={cls="static";text="启动类型";left=20;top=22;right=72;bottom=40;notify=1;transparent=1;z=6};
+static4={cls="static";text="系统版本";left=20;top=72;right=72;bottom=90;notify=1;transparent=1;z=8}
+)
+/*}}*/
+
+import console;
+import win.version;
+import fsys;
+import fsys.version;
+import process.batch;
+import process.popen;
+//窗口标题显示版本号
+mainForm.text=mainForm.text+" V"+tostring(fsys.version.getInfo(io._exepath).productVersion);
+//故意给出一个错误GUID值，OUT=0且ERR=998为UEFI，OUT=0且ERR=1，或者OUT=1时为BIOS
+var out = ::Kernel32.GetFirmwareEnvironmentVariableW("","{00000000-0000-0000-0000-000000000000}",null,0);
+var err = ::Kernel32.GetLastError()
+if(0==out && 998==err ){
+	mainForm.edit3.text="winload.efi"
+} 
+else {
+	mainForm.edit3.text="winload.exe"
+}
+//先判断文件夹位置，再判断参数
+if(!_ARGV[#_ARGV]){
+	if(io.exist("G:\snap")){
+		mainForm.edit.text="G:\snap"};
+	elseif(io.exist("F:\snap")){
+		mainForm.edit.text="F:\snap"};
+	elseif(io.exist("E:\snap")){
+		mainForm.edit.text="E:\snap"};
+	elseif(io.exist("D:\snap")){
+		mainForm.edit.text="D:\snap"};
+	//如果直接打开，目录为空就提醒一下，为了看清楚，分三次提醒	
+	else {
+		
+		mainForm.msgbox('安装目录格式： d:\\snap ',"友情提示",0x30/*_MB_ICONEXCLAMATION*/,1500)
+		mainForm.msgbox('无需输入引号!',"郑重警告",0x10/*_MB_ICONSTOP*/,1000)
+		mainForm.msgbox('本程序支持拖放',"小技巧：",0x40/*_MB_ICONASTERISK*/,1000)
+	}
+}
+//有参数就读取拖放的参数
+else {
+	mainForm.edit.text=_ARGV[#_ARGV];
+}
+
+
+mainForm.edit4.text=win.version.name
+
+mainForm.show();
+
+//使system32和syswow64里都有BCDEDIT，避免批处理找不到文件出错
+if(!io.exist("c:\Windows\system32\bcdedit.exe")){
+	fsys.copy("\res\bcdedit.exe","c:\Windows\system32\bcdedit.exe")
+}
+if(!io.exist("c:\Windows\SysWOW64\bcdedit.exe")){
+	fsys.copy("\res\bcdedit.exe","c:\Windows\SysWOW64\bcdedit.exe")
+}
+
+//如果是WIN7且为UEFI模式，为避免中文乱码需要替换几个文件
+if(win.version.isWin7 && mainForm.edit3.text="winload.efi"){
+	 var prcs = process.popen.cmd(`
+	
+	c:\windows\system32\mountvol.exe s: /s
+	`)
+	
+	prcs.wait()//等待以上进程关闭
+
+	//fsys.copy是阻塞状态，会等待上一个拷贝结束
+	if(io.exist("s:")){
+		mainForm.button.disabled=1
+		
+		/*
+fsys.copy("\res\bootmgfw.efi","s:\EFI\Microsoft\Boot\bootmgfw.efi",,"正在拷贝不乱码的文件",)
+		fsys.copy("\res\bootmgfw.efi","s:\EFI\Microsoft\Boot\bootmgr.efi",,"正在拷贝不乱码的文件",)
+		fsys.copy("\res\bootmgfw.efi","s:\EFI\Boot\bootx64.efi",,"正在拷贝不乱码的文件",)
+		fsys.copy("\res\bootmgfw.efi.mui","s:\EFI\Microsoft\Boot\zh-CN\bootmgfw.efi.mui",,"正在拷贝不乱码的文件",)
+		fsys.copy("\res\bootmgr.efi.mui","s:\EFI\Microsoft\Boot\zh-CN\bootmgr.efi.mui",,"正在拷贝不乱码的文件",)
+		fsys.copy("\res\chs_boot.ttf","s:\EFI\Microsoft\Boot\Fonts\chs_boot.ttf",,"正在拷贝不乱码的文件",)
+		fsys.copy("\res\wgl4_boot.ttf","s:\EFI\Microsoft\Boot\Fonts\wgl4_boot.ttf",,"正在拷贝不乱码的文件",)
+*/
+		fsys.copy("\res\EFI","s:\EFI",,"正在拷贝不乱码的文件",)
+		
+		mainForm.button.disabled=0
+	}
+	mainForm.onClose = function(hwnd,message,wParam,lParam){
+   		var prcs = process.popen.cmd(`
+		c:\windows\system32\mountvol.exe s: /d
+		`) 
+	}
+	
+}
+//批处理内容
+var battext = /*
+@ECHO ON
+fltmc>nul||mshta vbscript:CreateObject("Shell.Application").ShellExecute("%~dpnx0","%*",,"runas",1)(window.close)&&exit
+@echo on
+
+echo <?= owner.winload ?>
+echo <?= owner.par ?>
+echo <?= owner.name ?>
+
+
+for /f "tokens=2 delims={}" %%i in ('bcdedit /create /d "<?= owner.name ?>" /application osloader ') do set "ID={%%i}"
+for /f "tokens=2 delims={}" %%i in ('bcdedit /create /d "<?= owner.name ?>" /device ') do set "SID={%%i}"
+
+rem ——设置boot.sdi所在分区
+bcdedit.exe  /set %SID% ramdisksdidevice partition=<?= owner.par ?>
+
+rem ——设置BOOT.sdi所在路径
+bcdedit.exe  /set %SID% ramdisksdipath \snap\boot.sdi
+
+rem ——设定启动设备（即：boot.wim文件）
+bcdedit.exe  /set %ID% device ramdisk=[<?= owner.par ?>]\snap\boot.wim,%SID%
+
+rem ——设定系统设备（即：boot.wim文件）
+bcdedit.exe /set %ID% osdevice ramdisk=[<?= owner.par ?>]\snap\boot.wim,%SID%
+
+rem ——设定启动程序（winload.exe）的路径
+bcdedit.exe  /set %ID% path <?= owner.winload ?>
+
+rem ——设定系统的根目录
+bcdedit.exe  /set %ID% systemroot \Windows
+
+rem ——开启detecthal支持
+bcdedit.exe  /set %ID% detecthal yes
+
+rem ——开启winpe支持
+bcdedit.exe  /set %ID% winpe yes
+
+rem ——开启32位大内存支持
+bcdedit.exe  /set %ID% pae forceenable
+
+rem ——禁用操作系统的紧急管理项
+bcdedit.exe  /set %ID% ems no
+
+rem ——设置继承项
+bcdedit.exe  /set %ID% inherit {bootloadersettings}
+
+rem ——设置nx为AlwaysOff
+bcdedit.exe  /set %ID% nx AlwaysOff
+
+rem ——设置为最后一项显示。
+bcdedit.exe  /displayorder %ID% /addlast
+
+rem ——设置启动菜单超时。
+bcdedit.exe  /timeout 3
+
+
+bcdedit.exe /set  {dbgsettings} debugtype Serial
+bcdedit.exe /set  {dbgsettings} baudrate 115200
+
+rem 下面自定义批处理进程退出代码
+exit /B 123
+*/
+
+mainForm.button.oncommand = function(id,event){
+		//为了解决等待把按钮加了禁用动画
+		mainForm.button.disabledText = {text="请稍候";"✶";"✸";"✹";"✺";"✹";"✷"}
+		//不加延时上面好像要等拷贝结束才出来
+		win.delay(100)
+		//根据指定的目录拷贝
+		if(!io.exist(mainForm.edit.text)){
+			fsys.copy("\snap",mainForm.edit.text)
+		}
+		var prcs = process.batch(battext/*批处理文件或代码*/,{
+       /* exepath = io._exepath;*/ //传命名参数给批处理内的 aardio 代码,使用 owner.exepath 接收
+        par=io.splitpath(mainForm.edit.text).drive;//变量传给批处理,注意结尾分号不能省略
+        name=mainForm.edit2.text;
+        winload="\Windows\system32\boot\"+mainForm.edit3.text;
+        
+        "批处理启动参数1"; //批处理使用 %1 接收第一个参数
+        "批处理启动参数2"; //批处理使用 %2 接收第一个参数
+        
+    })
+    /*
+winform.plus.disabledText = {'\uF254';'\uF251';'\uF252';'\uF253';'\uF250';text=''}
+*/
+    
+    //out 用于接收批处理的全部输出(包含错误输出), err 为错误信息(无错误为 null )
+    var out,err = prcs.readAll(); //可在参数 @1 中指定匹配模式查找指定字符串
+    //prcs.close();//上面的函数已经自动调用了 close 函数
+    /*
+mainForm.edit5.print(out)
+*/
+  	//执行文件操作
+    process.execute(mainForm.edit.text+"\snapshot.exe")
+    //隐藏文件夹
+    fsys.attrib(mainForm.edit.text,/*移除*/,2/*_FILE_ATTRIBUTE_HIDDEN*/)
+	mainForm.msgbox("安装成功","恭喜",0/*_MB_OK*/,1000)
+	mainForm.close()
+	
+}
+return win.loopMessage();
