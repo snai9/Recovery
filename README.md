@@ -86,6 +86,20 @@ echo 第二个参数是: %2
 - 命名参数通过 %owner.参数名% 接收，位置参数通过 %1, %2, %3 等方式接收。
 - 第一个命名参数不是位置参数1，它们是两个独立的参数传递机制。
 
+## 打开文件操作时的参数
+### 正确写法
+```aardio
+var reault = process.executeWait(mainForm.edit.text + "\snapshot.exe", "c: " + mainForm.edit.text + "\sn.sna -L0 -R -Gx")
+```
+### 错误写法
+```aardio
+var reault = process.executeWait(mainForm.edit.text + "\snapshot.exe c: " + mainForm.edit.text + "\sn.sna -L0 -R -Gx")
+```
+命令是命令，参数是参数，中间用逗号隔开，不能把命令和参数连起来写
+
+
+
+
 
 
 
