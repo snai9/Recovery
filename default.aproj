@@ -1,7 +1,7 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <project ver="10" name="一键恢复安装" libEmbed="true" icon="\res\ico.ico" ui="win" output="一键恢复安装.exe" CompanyName="流氓兔工作室" FileDescription="一键恢复安装" LegalCopyright="Copyright (C) 杨东 2022" ProductName="一键恢复安装" InternalName="一键恢复安装" FileVersion="6.0.0.46" ProductVersion="6.0.0.46" publishDir="/dist/" dstrip="false" local="false" ignored="false">
 	<file name="main.aardio" path="main.aardio" comment="main.aardio"/>
-	<folder name="资源文件" path="res" embed="true" local="false" ignored="false">
+	<folder name="资源文件" path="RES" embed="true" local="false" ignored="false">
 		<file name="bootmgfw.efi" path="res\bootmgfw.efi" comment="res\bootmgfw.efi"/>
 		<file name="bootmgfw.efi.mui" path="res\bootmgfw.efi.mui" comment="res\bootmgfw.efi.mui"/>
 		<file name="chs_boot.ttf" path="res\chs_boot.ttf" comment="res\chs_boot.ttf"/>
